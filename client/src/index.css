@@ -1,0 +1,263 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(180 6.6667% 97.0588%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(207.3 90% 54%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-variant: hsl(208 91% 50%);
+  --secondary: hsl(174 100% 44%);
+  --secondary-foreground: hsl(0 0% 0%);
+  --muted: hsl(240 1.9608% 90%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(211.5789 51.3514% 92.7451%);
+  --accent-foreground: hsl(203.8863 88.2845% 53.1373%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(201.4286 30.4348% 90.9804%);
+  --input: hsl(200 23.0769% 97.4510%);
+  --ring: hsl(202.8169 89.1213% 53.1373%);
+  --surface: hsl(0 0% 100%);
+  --background-gray: hsl(210 14% 96%);
+  --error: hsl(0 84% 60%);
+  --font-roboto: 'Roboto', sans-serif;
+  --radius: 0.5rem;
+  --material-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --material-shadow-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  --material-shadow-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  --material-shadow-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(200 6.6667% 91.1765%);
+  --card: hsl(228 9.8039% 10%);
+  --card-foreground: hsl(0 0% 85.0980%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(200 6.6667% 91.1765%);
+  --primary: hsl(207.3 90% 54%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-variant: hsl(208 91% 50%);
+  --secondary: hsl(174 100% 44%);
+  --secondary-foreground: hsl(0 0% 0%);
+  --muted: hsl(0 0% 9.4118%);
+  --muted-foreground: hsl(210 3.3898% 46.2745%);
+  --accent: hsl(205.7143 70% 7.8431%);
+  --accent-foreground: hsl(203.7736 87.6033% 52.5490%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 5.2632% 14.9020%);
+  --input: hsl(207.6923 27.6596% 18.4314%);
+  --ring: hsl(202.8169 89.1213% 53.1373%);
+  --surface: hsl(228 9.8039% 10%);
+  --background-gray: hsl(210 11% 11%);
+  --error: hsl(0 84% 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground;
+    font-family: var(--font-roboto);
+    background-color: var(--background-gray);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .material-shadow-1 {
+    box-shadow: var(--material-shadow-1);
+  }
+  
+  .material-shadow-2 {
+    box-shadow: var(--material-shadow-2);
+  }
+  
+  .material-shadow-3 {
+    box-shadow: var(--material-shadow-3);
+  }
+  
+  .material-shadow-4 {
+    box-shadow: var(--material-shadow-4);
+  }
+
+  .ripple {
+    position: relative;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .ripple:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .ripple:active:before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .status-bar {
+    height: 24px;
+    background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.1));
+  }
+
+  .material-input {
+    @apply w-full p-3 bg-gray-50 dark:bg-input border-0 rounded-lg focus:ring-2 focus:ring-primary transition-all;
+  }
+  
+  .material-input:focus {
+    background-color: var(--surface);
+  }
+  
+  .dark .material-input:focus {
+    background-color: var(--card);
+  }
+
+  .material-button {
+    @apply font-medium py-3 px-6 rounded-lg transition-all duration-200 material-shadow-1 hover:material-shadow-2 active:material-shadow-1;
+  }
+
+  .material-button-primary {
+    @apply material-button bg-primary text-primary-foreground ripple;
+  }
+  
+  .material-button-primary:hover {
+    background-color: var(--primary-variant);
+  }
+
+  .material-button-secondary {
+    @apply material-button bg-secondary text-secondary-foreground ripple;
+  }
+  
+  .material-button-secondary:hover {
+    opacity: 0.9;
+  }
+
+  .material-card {
+    @apply rounded-xl material-shadow-1 hover:material-shadow-2 transition-all duration-200;
+    background-color: var(--surface);
+  }
+  
+  .dark .material-card {
+    background-color: var(--card);
+  }
+
+  .status-chip {
+    @apply inline-block px-3 py-1 text-xs font-medium rounded-full;
+  }
+
+  .status-chip-pending {
+    @apply status-chip bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300;
+  }
+
+  .status-chip-progress {
+    @apply status-chip bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300;
+  }
+
+  .status-chip-completed {
+    @apply status-chip bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300;
+  }
+
+  .status-chip-partial {
+    @apply status-chip bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300;
+  }
+
+  .status-chip-canceled {
+    @apply status-chip bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.5s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 2s linear infinite;
+}

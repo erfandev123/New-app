@@ -1,0 +1,86 @@
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getAuth } from "firebase/auth";
+import { app } from "@/services/firebase";
+
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+}
+
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: unknown | undefined,
+): Promise<Response> {
+  const auth = getAuth(app);
+  const user = auth.currentUser;
+  const token = user ? await user.getIdToken() : null;
+
+  const headers: Record<string, string> = {};
+  if (data) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+    // pass extra headers to help the server link users without admin SDK
+    if (user?.uid) headers["x-firebase-uid"] = user.uid;
+    if (user?.email) headers["x-user-email"] = user.email as string;
+  }
+
+  const res = await fetch(`/api${url}`, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: "include",
+  });
+
+  await throwIfResNotOk(res);
+  return res;
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn: <T>(options: {
+  on401: UnauthorizedBehavior;
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }: any) => {
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+      if (user?.uid) headers["x-firebase-uid"] = user.uid;
+      if (user?.email) headers["x-user-email"] = user.email as string;
+    }
+
+    const res = await fetch(`http://10.0.2.2:5000${queryKey.join("/")}`, {
+      headers,
+      credentials: "include",
+    });
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
+    }
+
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
+      refetchOnWindowFocus: true,
+      staleTime: 30 * 1000, // 30 seconds for faster balance updates
+      retry: 1,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});

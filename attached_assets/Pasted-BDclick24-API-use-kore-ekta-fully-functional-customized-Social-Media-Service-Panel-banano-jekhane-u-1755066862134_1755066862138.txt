@@ -1,0 +1,214 @@
+BDclick24 API use kore ekta fully functional, customized Social Media Service Panel banano jekhane user:
+
+Services list dekhte parbe
+
+Order place korte parbe (followers, comments, etc.)
+
+Order status check korte parbe
+
+Balance check korte parbe
+
+Simple but modern UI thakbe
+
+
+
+---
+
+1. API Info
+
+Base URL: https://bdclick24.com/api/v2
+
+Method: POST
+
+Format: JSON
+
+API Key: 75e58509b417b5041d3f79c09bc46746  (Keep secure, do not expose in frontend)
+
+
+
+---
+
+2. API Actions
+
+Action	Parameters Required	Purpose
+
+services	key, action=services	All available services list fetch kore
+add	key, action=add, service, link, quantity	New order create kore
+status	key, action=status, order	Order er current status check kore
+balance	key, action=balance	Account er balance check kore
+
+
+
+---
+
+3. API Request Example
+
+Get Services:
+
+{
+  "key": "API_KEY",
+  "action": "services"
+}
+
+Place Order:
+
+{
+  "key": "API_KEY",
+  "action": "add",
+  "service": 1,
+  "link": "https://instagram.com/username",
+  "quantity": 100
+}
+
+Check Status:
+
+{
+  "key": "API_KEY",
+  "action": "status",
+  "order": 23501
+}
+
+Check Balance:
+
+{
+  "key": "API_KEY",
+  "action": "balance"
+}
+
+
+---
+
+4. Web App Requirements
+
+Backend (Node.js + Express preferred)
+
+All API requests must be done from backend to keep API key secure.
+
+Backend endpoints:
+
+/services → Fetch all services
+
+/order → Place new order
+
+/status/:orderId → Check order status
+
+/balance → Get account balance
+
+
+Use axios for HTTP requests.
+
+
+Frontend (React / Vue / HTML-CSS-JS)
+
+Pages:
+
+1. Dashboard
+
+Show balance
+
+Quick link to services & orders
+
+
+
+2. Services List
+
+Show all services (name, category, rate, min, max)
+
+Button to place order
+
+
+
+3. Place Order Form
+
+Service dropdown
+
+Link input
+
+Quantity input
+
+
+
+4. Order Status
+
+Enter Order ID
+
+Show current status (In progress, Completed, Partial, Canceled)
+
+
+
+5. Order History (optional)
+
+
+
+UI: Simple, responsive, mobile-friendly.
+
+Use Bootstrap or TailwindCSS for styling.
+
+
+
+---
+
+5. Example Backend Code (Node.js + Express)
+
+const express = require("express");
+const axios = require("axios");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
+const API_URL = "https://bdclick24.com/api/v2";
+const API_KEY = "1d1a25c507e882874481880ee6500c30";
+
+// Get services
+app.get("/services", async (req, res) => {
+    const { data } = await axios.post(API_URL, { key: API_KEY, action: "services" });
+    res.json(data);
+});
+
+// Place order
+app.post("/order", async (req, res) => {
+    const { service, link, quantity } = req.body;
+    const { data } = await axios.post(API_URL, { key: API_KEY, action: "add", service, link, quantity });
+    res.json(data);
+});
+
+// Order status
+app.get("/status/:orderId", async (req, res) => {
+    const { data } = await axios.post(API_URL, { key: API_KEY, action: "status", order: req.params.orderId });
+    res.json(data);
+});
+
+// Balance
+app.get("/balance", async (req, res) => {
+    const { data } = await axios.post(API_URL, { key: API_KEY, action: "balance" });
+    res.json(data);
+});
+
+app.listen(5000, () => console.log("Server running on port 5000"));
+
+
+---
+
+6. Security Notes
+
+API Key should never be exposed in frontend code.
+
+All API calls must go through backend.
+
+Use .env file to store API key and load it with dotenv.
+
+
+
+---
+
+7. Deployment
+
+Backend: Host on Vercel, Render, or any Node.js server.
+
+Frontend: Host on Netlify, Vercel, or any static hosting.
+
+Make sure backend has CORS enabled for frontend domain.
+

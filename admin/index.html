@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialSphere Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8nZQ47JjGOumSdRy2G1MOXVS0RcNMGSc",
+            authDomain: "like-d1b1e.firebaseapp.com",
+            projectId: "like-d1b1e",
+            storageBucket: "like-d1b1e.firebasestorage.app",
+            messagingSenderId: "658954882036",
+            appId: "1:658954882036:web:f6001a576567e722f547a1",
+            measurementId: "G-88Q27QSQ2X",
+        };
+        
+        window.firebaseApp = initializeApp(firebaseConfig);
+        window.auth = getAuth(window.firebaseApp);
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
+    </script>
+    <style>
+        .sidebar-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateX(4px);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 w-96 max-w-md mx-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <p class="text-gray-600 mt-2">Enter your admin credentials</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="admin-email" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="darkerfanx@gmail.com" value="darkerfanx@gmail.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="admin-password" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Erfanbnp123" value="Erfanbnp123">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-200">
+                    Login
+                </button>
+            </form>
+            <div id="login-error" class="mt-4 text-red-500 text-sm text-center hidden"></div>
+        </div>
+    </div>
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0">
+        <div class="gradient-bg text-white p-6">
+            <h2 class="text-xl font-bold">Admin Panel</h2>
+            <p class="text-sm opacity-90">SocialSphere Management</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-2">
+            <a href="#dashboard" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('dashboard')">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                Dashboard
+            </a>
+            <a href="#users" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('users')">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                User Management
+            </a>
+            <a href="#services" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('services')">
+                <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                Service Management
+            </a>
+            <a href="#orders" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('orders')">
+                <i data-lucide="shopping-cart" class="w-5 h-5 mr-3"></i>
+                Orders
+            </a>
+            <a href="#payments" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('payments')">
+                <i data-lucide="credit-card" class="w-5 h-5 mr-3"></i>
+                Payments
+            </a>
+            <a href="#" class="sidebar-item flex items-center p-3 rounded-lg text-gray-700 hover:text-white transition-all duration-200" onclick="showSection('analytics')">
+                <i data-lucide="bar-chart" class="w-5 h-5 mr-3"></i>
+                <span>Analytics</span>
+            </a>
+        </nav>
+        
+        <!-- Logout Button -->
+        <div class="absolute bottom-4 left-4 right-4">
+            <button onclick="handleLogout()" class="w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition-all duration-200 flex items-center justify-center">
+                <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile menu button -->
+    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b p-4">
+            <div class="flex items-center justify-between">
+                <h1 id="page-title" class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Admin Portal</span>
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Total Users</p>
+                            <p id="total-users" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i data-lucide="shopping-cart" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Total Orders</p>
+                            <p id="total-orders" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <i data-lucide="dollar-sign" class="w-6 h-6 text-yellow-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Revenue</p>
+                            <p id="total-revenue" class="text-2xl font-bold text-gray-800">৳0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Services</p>
+                            <p id="total-services" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users-section" class="p-6 hidden">
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6 border-b">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold">User Management</h2>
+                        <button onclick="showAddUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                            Add Balance
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="mb-4">
+                        <input type="text" id="user-search" placeholder="Search users..." class="w-full p-3 border rounded-lg">
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left p-3">User</th>
+                                    <th class="text-left p-3">Email</th>
+                                    <th class="text-left p-3">Balance</th>
+                                    <th class="text-left p-3">Orders</th>
+                                    <th class="text-left p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div id="services-section" class="p-6 hidden">
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6 border-b">
+                    <h2 class="text-xl font-bold">Service Management</h2>
+                </div>
+                <div class="p-6">
+                    <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders-section" class="p-6 hidden">
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6 border-b">
+                    <h2 class="text-xl font-bold">Orders Management</h2>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left p-3">Order ID</th>
+                                    <th class="text-left p-3">User</th>
+                                    <th class="text-left p-3">Service</th>
+                                    <th class="text-left p-3">Status</th>
+                                    <th class="text-left p-3">Amount</th>
+                                    <th class="text-left p-3">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table">
+                                <!-- Orders will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Section -->
+        <div id="payments-section" class="p-6 hidden">
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6 border-b">
+                    <h2 class="text-xl font-bold">Payments Management</h2>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left p-3">Payment ID</th>
+                                    <th class="text-left p-3">User</th>
+                                    <th class="text-left p-3">Method</th>
+                                    <th class="text-left p-3">Amount</th>
+                                    <th class="text-left p-3">Status</th>
+                                    <th class="text-left p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table">
+                                <!-- Payments will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics-section" class="p-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-bold mb-4">Revenue Chart</h3>
+                    <div class="h-64 flex items-center justify-center text-gray-500">
+                        Chart will be implemented here
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-bold mb-4">Order Statistics</h3>
+                    <div class="h-64 flex items-center justify-center text-gray-500">
+                        Statistics will be implemented here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="add-balance-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                <h3 class="text-lg font-bold mb-4">Add Balance to User</h3>
+                <form id="add-balance-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">User Email</label>
+                        <input type="email" id="balance-email" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Amount (৳)</label>
+                        <input type="number" id="balance-amount" class="w-full p-3 border rounded-lg" min="1" required>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700">
+                            Add Balance
+                        </button>
+                        <button type="button" onclick="hideAddUserModal()" class="flex-1 bg-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-400">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
