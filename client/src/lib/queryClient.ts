@@ -16,17 +16,26 @@ export async function apiRequest(
 ): Promise<Response> {
   const auth = getAuth(app);
   const user = auth.currentUser;
-  const token = user ? await user.getIdToken() : null;
+  
+  // Get demo user from localStorage if no Firebase user
+  const savedUser = localStorage.getItem('socialSphere_user');
+  const demoUser = savedUser ? JSON.parse(savedUser) : null;
+  
+  const token = user ? await user.getIdToken() : (demoUser?.uid || 'demo-token');
 
   const headers: Record<string, string> = {};
   if (data) {
     headers["Content-Type"] = "application/json";
   }
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-    // pass extra headers to help the server link users without admin SDK
-    if (user?.uid) headers["x-firebase-uid"] = user.uid;
+  
+  headers["Authorization"] = `Bearer ${token}`;
+  // Use Firebase user data if available, otherwise use demo user
+  if (user?.uid) {
+    headers["x-firebase-uid"] = user.uid;
     if (user?.email) headers["x-user-email"] = user.email as string;
+  } else if (demoUser) {
+    headers["x-firebase-uid"] = demoUser.uid;
+    headers["x-user-email"] = demoUser.email;
   }
 
   const res = await fetch(`/api${url}`, {
@@ -48,13 +57,22 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }: any) => {
     const auth = getAuth(app);
     const user = auth.currentUser;
-    const token = user ? await user.getIdToken() : null;
+    
+    // Get demo user from localStorage if no Firebase user
+    const savedUser = localStorage.getItem('socialSphere_user');
+    const demoUser = savedUser ? JSON.parse(savedUser) : null;
+    
+    const token = user ? await user.getIdToken() : (demoUser?.uid || 'demo-token');
 
     const headers: Record<string, string> = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-      if (user?.uid) headers["x-firebase-uid"] = user.uid;
+    headers["Authorization"] = `Bearer ${token}`;
+    // Use Firebase user data if available, otherwise use demo user
+    if (user?.uid) {
+      headers["x-firebase-uid"] = user.uid;
       if (user?.email) headers["x-user-email"] = user.email as string;
+    } else if (demoUser) {
+      headers["x-firebase-uid"] = demoUser.uid;
+      headers["x-user-email"] = demoUser.email;
     }
 
     const res = await fetch(`${queryKey.join("/")}`, {
