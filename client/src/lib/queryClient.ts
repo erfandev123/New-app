@@ -57,7 +57,7 @@ export const getQueryFn: <T>(options: {
       if (user?.email) headers["x-user-email"] = user.email as string;
     }
 
-    const res = await fetch(`http://10.0.2.2:5000${queryKey.join("/")}`, {
+   const res = await fetch(`${queryKey.join("/")}`, {
       headers,
       credentials: "include",
     });
