@@ -26,7 +26,7 @@ function getApiKey(): string {
   return key;
 }
 
-// Simple token verification
+// Simple token verification with auto-user creation
 async function verifyFirebaseToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
@@ -42,6 +42,29 @@ async function verifyFirebaseToken(req: AuthenticatedRequest, res: Response, nex
     const email = (req.headers["x-user-email"] as string | undefined) || 'user@example.com';
 
     req.user = { uid, email };
+    
+    // Auto-create user if not exists
+    try {
+      let user = await storage.getUserByFirebaseUid(uid);
+      if (!user) {
+        // Try find by email first to avoid duplicates
+        const existingByEmail = email !== 'user@example.com' ? await storage.getUserByEmail(email) : undefined;
+        if (existingByEmail) {
+          user = await storage.updateUser(existingByEmail.id, { firebase_uid: uid });
+        } else {
+          user = await storage.createUser({
+            username: email || uid,
+            password: "", // not used
+            email: email || `${uid}@example.com`,
+            display_name: email || undefined,
+            firebase_uid: uid,
+          });
+        }
+      }
+    } catch (userError) {
+      console.error("Auto user creation failed:", userError);
+    }
+    
     next();
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
