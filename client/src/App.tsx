@@ -35,6 +35,18 @@ function Router() {
   useEffect(() => {
     const auth = getAuth(app);
     
+    // Create a demo user if no auth is available
+    const createDemoUser = () => {
+      const demoUser = {
+        uid: 'demo-user-' + Date.now(),
+        email: 'demo@socialsphere.com',
+        displayName: 'Demo User'
+      };
+      setUser(demoUser);
+      localStorage.setItem('socialSphere_user', JSON.stringify(demoUser));
+      return demoUser;
+    };
+    
     // Check for saved user session
     const savedUser = localStorage.getItem('socialSphere_user');
     if (savedUser) {
@@ -43,12 +55,16 @@ function Router() {
         setUser(userData);
       } catch (error) {
         localStorage.removeItem('socialSphere_user');
+        createDemoUser();
       }
+    } else {
+      // Create demo user if no saved session
+      createDemoUser();
     }
     
     return onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
       if (firebaseUser) {
+        setUser(firebaseUser);
         try {
           // Save user session
           localStorage.setItem('socialSphere_user', JSON.stringify({
@@ -60,10 +76,8 @@ function Router() {
         } catch (error) {
           console.error("Failed to sync user:", error);
         }
-      } else {
-        // Clear saved session on logout
-        localStorage.removeItem('socialSphere_user');
       }
+      // Don't clear user on logout - keep demo user
     });
   }, []);
 
